@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'api.apps.ApiConfig',
     'posts.apps.PostsConfig',
     'users.apps.UsersConfig',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,10 @@ TEMPLATES = [
         },
     },
 ]
+
+TEMPLATE_LOADERS = (
+    'django.template.loaders.eggs.Loader',
+)
 
 WSGI_APPLICATION = 'users_rating.wsgi.application'
 

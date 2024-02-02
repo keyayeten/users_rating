@@ -4,6 +4,7 @@ from rest_framework import serializers, status
 # from rest_framework.validators import (UniqueTogetherValidator,
 #                                        ValidationError)
 from users.models import User
+from posts.models import Post, PostRating
 # from django.core.exceptions import PermissionDenied
 
 
@@ -42,3 +43,55 @@ class CustomUserSerializer(UserSerializer):
             'first_name',
             'last_name'
         ]
+
+
+class PostRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PostRating
+        fields = ["post", "rating"]
+
+    def create(self, validated_data):
+        post_id = validated_data.get('post')
+        status = validated_data.get('rating')
+        user = self.context['request'].user
+        if PostRating.objects.filter(post=post_id, user=user).exists():
+            raise serializers.ValidationError("Рейтинг уже поставлен")
+
+        return PostRating.objects.create(
+            post=post_id, user=user, rating=status
+            )
+
+    def update(self, instance, validated_data):
+        instance.rating = validated_data.get('rating', instance.rating)
+        instance.save()
+        return instance
+
+    def delete(self, instance):
+        instance.delete()
+
+
+class PostSerializer(serializers.ModelSerializer):
+    votes = serializers.SerializerMethodField()
+    rating = serializers.SerializerMethodField()
+    author = CustomUserSerializer(read_only=True)
+
+    class Meta:
+        model = Post
+        fields = [
+            "id",
+            "author",
+            "text",
+            "votes",
+            "rating"
+        ]
+
+    def get_votes(self, obj):
+        total_ratings = PostRating.objects.filter(post=obj)
+        return total_ratings.count()
+
+    def get_rating(self, obj):
+        total_ratings = PostRating.objects.filter(post=obj)
+        res = 0
+        for rating in total_ratings:
+            res += 1 if rating.rating == "+" else -1
+        return res

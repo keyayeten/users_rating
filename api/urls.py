@@ -10,12 +10,8 @@ from .views import (
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Your API",
-        default_version='v1',
-        description="Your API description",
-        terms_of_service="https://www.example.com/terms/",
-        contact=openapi.Contact(email="contact@example.com"),
-        license=openapi.License(name="MIT License"),
+        title="Users ratings API",
+        default_version="v1"
     ),
     public=True,
     permission_classes=(permissions.AllowAny,),
